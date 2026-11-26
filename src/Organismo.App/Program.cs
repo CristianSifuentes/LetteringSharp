@@ -9,4 +9,4 @@ Console.WriteLine($"ATP en respiración aeróbica: {Fisiologia.AtpRespiracionAer
 Console.WriteLine($"ATP en glucólisis: {Fisiologia.AtpGlucolisis}");
 Console.WriteLine($"ATP por impulso: {Fisiologia.AtpPorImpulso}");
 Console.WriteLine($"ATP por contracción: {Fisiologia.AtpPorContraccion}");
-Console.WriteLine($"Vida media de un glóbulo rojo: {Fisiologia.VidaGlobuloRojo}");
+Console.WriteLine($"Vida media de un glóbulo rojo: {Fisiologia.VidaGlobuloRojo.TotalDays} días");
