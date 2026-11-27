@@ -3,6 +3,7 @@
 // Paso 1: 'class' en vez de 'record'.
 // Paso 2: propiedad { get; private set; }.
 // Paso 3: método de instancia que cambia el estado.
+// Paso 4: invariante (Atp nunca baja de 0) y validar ANTES de cambiar el estado.
 // ============================================================================
 
 // Fase 2 — Namespace file-scoped. Fase 3: la carpeta Organulos/ se refleja en el namespace.
@@ -38,5 +39,27 @@ public sealed class Mitocondria
     public void Respirar(Glucosa glucosa)
     {
         Atp += glucosa.Moleculas * Fisiologia.AtpRespiracionAerobica;
+    }
+
+    // Fase 4 · Paso 4 — Invariante: una regla que el objeto cumple SIEMPRE → Atp >= 0.
+    // Orden obligatorio: 1) validar  2) cambiar el estado.
+    // Si algo falla, la excepción salta ANTES de tocar Atp, así el objeto queda exactamente
+    // como estaba (nunca a medias). Si restáramos primero y validáramos después,
+    // un fallo dejaría Atp en negativo: el invariante roto.
+    public void Gastar(int atp)
+    {
+        // 1) Validar los argumentos: pedir una cantidad negativa no tiene sentido.
+        //    Helper de la BCL, como ArgumentException.ThrowIfNullOrWhiteSpace en Adn (Fase 3).
+        ArgumentOutOfRangeException.ThrowIfNegative(atp);
+
+        // 1) Validar el estado: el argumento es correcto, pero el objeto no puede cumplirlo ahora.
+        //    InvalidOperationException = "no en este momento", frente a ArgumentException = "dato malo".
+        if (atp > Atp)
+        {
+            throw new InvalidOperationException($"ATP insuficiente: se piden {atp} y solo hay {Atp}.");
+        }
+
+        // 2) Cambiar el estado: aquí ya sabemos que el resultado será >= 0.
+        Atp -= atp;
     }
 }

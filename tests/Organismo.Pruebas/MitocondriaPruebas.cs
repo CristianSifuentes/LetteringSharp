@@ -99,4 +99,66 @@ public class MitocondriaPruebas
         Assert.Equal(30, activa.Atp);
         Assert.Equal(0, quieta.Atp);
     }
+
+    // Fase 4 · Paso 4 — Gastar resta del ATP disponible.
+    [Fact]
+    public void GastarRestaAtp()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+        mitocondria.Respirar(new Glucosa(1));   // 30
+
+        // Act
+        mitocondria.Gastar(Fisiologia.AtpPorImpulso);   // 3
+
+        // Assert
+        Assert.Equal(27, mitocondria.Atp);
+    }
+
+    // Fase 4 · Paso 4 — Gastar exactamente todo es válido: el invariante es >= 0, no > 0.
+    [Fact]
+    public void GastarTodoDejaCero()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+        mitocondria.Respirar(new Glucosa(1));
+
+        // Act
+        mitocondria.Gastar(30);
+
+        // Assert
+        Assert.Equal(0, mitocondria.Atp);
+    }
+
+    // Fase 4 · Paso 4 — La clave del invariante: la excepción salta ANTES de cambiar el estado.
+    [Fact]
+    public void GastarMasDeLoQueHayLanzaYNoCambiaElAtp()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+        mitocondria.Respirar(new Glucosa(1));   // 30
+
+        // Act
+        var accion = () => mitocondria.Gastar(31);
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(accion);
+        Assert.Equal(30, mitocondria.Atp);      // intacto: no quedó a medias
+    }
+
+    // Fase 4 · Paso 4 — Un argumento inválido también se rechaza sin tocar el estado.
+    [Fact]
+    public void GastarUnaCantidadNegativaLanza()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+        mitocondria.Respirar(new Glucosa(1));
+
+        // Act
+        var accion = () => mitocondria.Gastar(-5);
+
+        // Assert
+        Assert.Throws<ArgumentOutOfRangeException>(accion);
+        Assert.Equal(30, mitocondria.Atp);
+    }
 }
