@@ -1,11 +1,12 @@
 <Project>
-  <!-- Reglas comunes: cada proyecto de la solución las hereda. -->
+  <!-- Fase 1 — Reglas comunes: MSBuild carga este archivo antes de cada .csproj
+       que esté debajo de esta carpeta, así que los tres proyectos las heredan. -->
   <PropertyGroup>
     <TargetFramework>net11.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AnalysisLevel>latest</AnalysisLevel>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <Nullable>enable</Nullable>                           <!-- avisa de posibles null -->
+    <ImplicitUsings>enable</ImplicitUsings>               <!-- using System; etc. automáticos -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>   <!-- una advertencia rompe la compilación -->
+    <AnalysisLevel>latest</AnalysisLevel>                 <!-- analizadores de código más recientes -->
+    <InvariantGlobalization>true</InvariantGlobalization> <!-- sin datos culturales: 37.5 y no 37,5 -->
   </PropertyGroup>
 </Project>

@@ -89,3 +89,50 @@ dotnet test
 dotnet run --project src/Organismo.App
 git add -A && git commit -m "Fase 2: Fisiologia, el «global» de C#"
 ```
+
+
+# Fase3
+
+Moléculas y visibilidad: `record` para datos con igualdad por valor, y la escalera de visibilidad de tipos `public` → `internal` → `file`.
+
+| Modificador | Quién lo ve | Ejemplo |
+|---|---|---|
+| `public` | cualquier proyecto que referencie el .dll | `Fisiologia`, `Adn`, `Glucosa` |
+| `internal` | solo `Organismo.Biologia` (+ `Organismo.Pruebas` por `InternalsVisibleTo`) | `Ensamblado` |
+| `file` | solo el archivo `.cs` donde se declara (C# 11) | `Bases` en `Adn.cs` |
+| `private` | solo el tipo que lo contiene | `Bases.Validas` |
+
+```bash
+# 1. Las moléculas (sealed record) y las herramientas internas
+mkdir -p src/Organismo.Biologia/Moleculas
+code src/Organismo.Biologia/Moleculas/Adn.cs         # record Adn + file class Bases
+code src/Organismo.Biologia/Moleculas/Moleculas.cs   # Glucosa, ImpulsoElectrico, Hormona
+code src/Organismo.Biologia/Ensamblado.cs            # internal static class Ensamblado
+
+# 2. Pruebas: records, validación e internal (gracias a InternalsVisibleTo de la Fase 1)
+git rm tests/Organismo.Pruebas/UnitTest1.cs
+code tests/Organismo.Pruebas/MoleculasPruebas.cs
+code tests/Organismo.Pruebas/EnsambladoPruebas.cs
+
+# 3. Usarlas desde la App (editar Program.cs) y ejecutar
+dotnet run --project src/Organismo.App
+
+# 4. Experimentos: romper el código, compilar, leer el error y deshacer el cambio
+#    a) Ensamblado.ProporcionGc("ACGT");          en Program.cs    → CS0122 (internal)
+#    b) Bases.Validar("ACGT");                    en Program.cs    → CS0103 (file)
+#    c) Bases.Validar("ACGT");                    en Moleculas.cs  → CS0103 (file: ni el mismo proyecto)
+#    d) Adn.Humano with { Secuencia = "A" }       en cualquier sitio → CS0200 (solo get)
+#    e) quitar <InternalsVisibleTo> del .csproj   → CS0122 en EnsambladoPruebas.cs
+dotnet build
+
+# 5. Comprobar y guardar
+dotnet build                         # 0 Advertencia(s), 0 Errores
+dotnet test                          # Passed: 21
+dotnet run --project src/Organismo.App
+git add -A && git commit -m "Fase 3: moléculas como record y visibilidad public/internal/file"
+```
+
+Qué genera el compilador para un `record` posicional como `Adn(string Secuencia)`:
+- Constructor, propiedades, `Deconstruct` y `ToString` → `Adn { Secuencia = ATGC, ... }`.
+- `Equals`, `GetHashCode`, `==` y `!=` **por valor**: `new Adn("acgt") == new Adn("ACGT")` es `true`.
+- Expresión `with`: copia el objeto. **No** vuelve a ejecutar la validación del constructor, por eso `Secuencia` solo tiene `get`.
