@@ -7,5 +7,6 @@ public sealed record Glucosa(int Moleculas)
       >= 0 ? Moleculas : throw new ArgumentOutOfRangeException(nameof(Moleculas), "La cantidad de moléculas de glucosa no puede ser negativa.");
 }
 
+
 public sealed record ImpulsoElectrico(double Milivoltios);
 public sealed record Hormona(string Nombre, double Concentracion);
