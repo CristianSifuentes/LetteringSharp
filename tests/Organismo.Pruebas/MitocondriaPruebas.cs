@@ -36,4 +36,19 @@ public class MitocondriaPruebas
         Assert.Same(a, otra);
         Assert.True(a == otra);
     }
+
+    // Fase 4 · Paso 2 — Atp se puede leer desde fuera y empieza en 0 (valor por defecto de int).
+    // Escribir  mitocondria.Atp = 5;  aquí no compilaría: CS0272.
+    [Fact]
+    public void UnaMitocondriaNuevaEmpiezaSinAtp()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+
+        // Act
+        var atp = mitocondria.Atp;   // leer sí está permitido (get público)
+
+        // Assert
+        Assert.Equal(0, atp);
+    }
 }
