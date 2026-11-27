@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Fase 1 — Biblioteca de clases: compila a Organismo.Biologia.dll.
+       TargetFramework, Nullable e ImplicitUsings vienen de Directory.Build.props. -->
+
   <ItemGroup>
+    <!-- Fase 1 (preparado) / Fase 3 (usado): lo 'internal' de este ensamblado
+         también es visible para el proyecto de pruebas. Ver Ensamblado.cs. -->
     <InternalsVisibleTo Include="Organismo.Pruebas" />
   </ItemGroup>
 

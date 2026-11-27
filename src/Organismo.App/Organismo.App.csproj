@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Fase 1 — Aplicación de consola: el ejecutable se llama 'cuerpo'. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>cuerpo</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Fase 1 — App → Biologia: la App ve lo 'public' de la biblioteca, pero no lo 'internal'. -->
     <ProjectReference Include="..\Organismo.Biologia\Organismo.Biologia.csproj" />
   </ItemGroup>
 
