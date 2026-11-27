@@ -2,6 +2,8 @@
 // Fase 4 — Pruebas de clases con estado.
 // Cada prueba sigue el patrón AAA: Arrange (preparar), Act (actuar), Assert (comprobar).
 // ============================================================================
+using Organismo.Biologia;
+using Organismo.Biologia.Moleculas;
 using Organismo.Biologia.Organulos;
 
 namespace Organismo.Pruebas;
@@ -50,5 +52,51 @@ public class MitocondriaPruebas
 
         // Assert
         Assert.Equal(0, atp);
+    }
+
+    // Fase 4 · Paso 3 — Un método de instancia cambia el estado del objeto.
+    [Fact]
+    public void RespirarDosGlucosasProduceSesentaAtp()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+
+        // Act
+        mitocondria.Respirar(new Glucosa(2));
+
+        // Assert
+        Assert.Equal(2 * Fisiologia.AtpRespiracionAerobica, mitocondria.Atp);   // 60
+    }
+
+    // Fase 4 · Paso 3 — El estado se conserva entre llamadas: respirar dos veces acumula.
+    [Fact]
+    public void RespirarDosVecesAcumula()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+
+        // Act
+        mitocondria.Respirar(new Glucosa(1));
+        mitocondria.Respirar(new Glucosa(1));
+
+        // Assert
+        Assert.Equal(60, mitocondria.Atp);
+    }
+
+    // Fase 4 · Paso 3 — Cada objeto tiene su propio estado (une Paso 1 y Paso 3).
+    // Con un miembro 'static' esto sería imposible: habría un único Atp compartido.
+    [Fact]
+    public void DosMitocondriasTienenAtpIndependiente()
+    {
+        // Arrange
+        var activa = new Mitocondria();
+        var quieta = new Mitocondria();
+
+        // Act
+        activa.Respirar(new Glucosa(1));
+
+        // Assert
+        Assert.Equal(30, activa.Atp);
+        Assert.Equal(0, quieta.Atp);
     }
 }
