@@ -180,4 +180,36 @@ public class MitocondriaPruebas
         mitocondria.Gastar(mitocondria.Atp);
         Assert.True(mitocondria.EstaAgotada);
     }
+
+    // Fase 4 · Paso 6 — Las dos sobrecargas producen lo mismo.
+    [Fact]
+    public void LasDosSobrecargasDeRespirarDanLoMismo()
+    {
+        // Arrange
+        var conGlucosa = new Mitocondria();
+        var conEntero = new Mitocondria();
+
+        // Act
+        conGlucosa.Respirar(new Glucosa(2));   // → Respirar(Glucosa)
+        conEntero.Respirar(2);                 // → Respirar(int)
+
+        // Assert
+        Assert.Equal(60, conGlucosa.Atp);
+        Assert.Equal(conGlucosa.Atp, conEntero.Atp);
+    }
+
+    // Fase 4 · Paso 6 — Al delegar en new Glucosa(...), la validación de la Fase 3 se reutiliza.
+    [Fact]
+    public void RespirarUnNumeroNegativoLanzaYNoCambiaElAtp()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+
+        // Act
+        var accion = () => mitocondria.Respirar(-1);
+
+        // Assert
+        Assert.Throws<ArgumentOutOfRangeException>(accion);
+        Assert.Equal(0, mitocondria.Atp);
+    }
 }
