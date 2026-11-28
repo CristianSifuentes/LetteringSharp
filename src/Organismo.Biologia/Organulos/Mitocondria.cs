@@ -6,6 +6,7 @@
 // Paso 4: invariante (Atp nunca baja de 0) y validar ANTES de cambiar el estado.
 // Paso 5: propiedad calculada sobre estado que cambia.
 // Paso 6: sobrecarga de métodos.
+// Paso 7: constructor normal y encadenar constructores con : this(...).
 // ============================================================================
 
 // Fase 2 — Namespace file-scoped. Fase 3: la carpeta Organulos/ se refleja en el namespace.
@@ -28,7 +29,7 @@ public sealed class Mitocondria
     // Desde fuera,  m.Atp = 9999;  → error CS0272 (el descriptor set es inaccesible).
     // Así nadie fabrica ATP de la nada: el estado solo cambiará con métodos de la clase (Paso 3).
     // Compáralo con Adn.Secuencia { get; } (Fase 3): ni siquiera desde dentro puede cambiar.
-    // Sin inicializar, un int vale 0 (valor por defecto).
+    // Su valor inicial lo pone el constructor (Paso 7).
     public int Atp { get; private set; }
 
     // Fase 4 · Paso 5 — Propiedad CALCULADA (expression-bodied, '=>'): no guarda nada,
@@ -38,6 +39,27 @@ public sealed class Mitocondria
     // luego true otra vez. No hace falta mantenerla "sincronizada": nunca se queda desfasada.
     // No tiene 'set': no se puede asignar ni desde dentro (solo se cambia cambiando Atp).
     public bool EstaAgotada => Atp == 0;
+
+    // Fase 4 · Paso 7 — Constructor NORMAL: se llama como la clase y no devuelve nada.
+    // Se ejecuta una vez, al hacer new, y deja el objeto en un estado válido desde el principio.
+    // Frente al constructor primario del record (Fase 3: Adn(string Secuencia)), este:
+    //   - no genera propiedades: las asignamos nosotros (Atp = atpInicial);
+    //   - puede tener cuerpo { } con la validación y la lógica que haga falta.
+    // Aplica el invariante del Paso 4 también al NACER: no hay mitocondrias con ATP negativo.
+    public Mitocondria(int atpInicial)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(atpInicial);
+        Atp = atpInicial;   // private set: desde dentro sí se puede escribir
+    }
+
+    // Fase 4 · Paso 7 — Encadenar constructores con ': this(...)'.
+    // En cuanto declaras un constructor con parámetros, C# deja de generar el constructor
+    // vacío automático, y  new Mitocondria()  dejaría de compilar (CS7036).
+    // Este lo recupera reutilizando el otro: ': this(0)' llama a Mitocondria(0) ANTES de su
+    // cuerpo (vacío). Así la validación y la asignación viven en un solo constructor.
+    public Mitocondria() : this(0)
+    {
+    }
 
     // Fase 4 · Paso 3 — Método de INSTANCIA: se llama sobre un objeto (mitocondria.Respirar(g))
     // y cambia el estado de ESE objeto. Cada Mitocondria tiene su propio Atp.

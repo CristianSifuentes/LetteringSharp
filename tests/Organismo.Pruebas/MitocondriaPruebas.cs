@@ -212,4 +212,40 @@ public class MitocondriaPruebas
         Assert.Throws<ArgumentOutOfRangeException>(accion);
         Assert.Equal(0, mitocondria.Atp);
     }
+
+    // Fase 4 · Paso 7 — El constructor con parámetro fija el estado inicial.
+    [Fact]
+    public void ElConstructorFijaElAtpInicial()
+    {
+        // Arrange + Act
+        var mitocondria = new Mitocondria(atpInicial: 50);
+
+        // Assert
+        Assert.Equal(50, mitocondria.Atp);
+        Assert.False(mitocondria.EstaAgotada);
+    }
+
+    // Fase 4 · Paso 7 — new Mitocondria() encadena con : this(0).
+    [Fact]
+    public void ElConstructorVacioEmpiezaEnCero()
+    {
+        // Arrange + Act
+        var vacia = new Mitocondria();
+        var conCero = new Mitocondria(0);
+
+        // Assert
+        Assert.Equal(conCero.Atp, vacia.Atp);
+        Assert.True(vacia.EstaAgotada);
+    }
+
+    // Fase 4 · Paso 7 — El invariante del Paso 4 también se cumple al construir.
+    [Fact]
+    public void ElConstructorRechazaAtpNegativo()
+    {
+        // Arrange + Act
+        var accion = () => new Mitocondria(-1);
+
+        // Assert
+        Assert.Throws<ArgumentOutOfRangeException>(accion);
+    }
 }
