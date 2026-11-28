@@ -248,4 +248,45 @@ public class MitocondriaPruebas
         // Assert
         Assert.Throws<ArgumentOutOfRangeException>(accion);
     }
+
+    // Fase 4 · Paso 8 — El campo readonly se fija en el constructor y se lee por la propiedad.
+    [Fact]
+    public void LaCapacidadSeFijaAlConstruir()
+    {
+        // Arrange + Act
+        var pequena = new Mitocondria(atpInicial: 0, capacidadMaxima: 100);
+        var normal = new Mitocondria();
+
+        // Assert: cada objeto tiene la suya (readonly), a diferencia de una const
+        Assert.Equal(100, pequena.CapacidadMaxima);
+        Assert.Equal(1000, normal.CapacidadMaxima);
+    }
+
+    // Fase 4 · Paso 8 — Respirar no supera la capacidad.
+    [Fact]
+    public void RespirarNoSuperaLaCapacidad()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria(atpInicial: 0, capacidadMaxima: 100);
+
+        // Act
+        mitocondria.Respirar(10);   // produciría 300
+
+        // Assert
+        Assert.Equal(100, mitocondria.Atp);
+    }
+
+    // Fase 4 · Paso 8 — Datos de construcción imposibles se rechazan.
+    [Theory]
+    [InlineData(0, 0)]      // capacidad 0
+    [InlineData(0, -5)]     // capacidad negativa
+    [InlineData(200, 100)]  // ATP inicial mayor que la capacidad
+    public void ElConstructorRechazaCapacidadesInvalidas(int atpInicial, int capacidadMaxima)
+    {
+        // Arrange + Act
+        var accion = () => new Mitocondria(atpInicial, capacidadMaxima);
+
+        // Assert
+        Assert.Throws<ArgumentOutOfRangeException>(accion);
+    }
 }
