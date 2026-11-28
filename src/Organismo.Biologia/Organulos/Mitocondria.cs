@@ -5,6 +5,7 @@
 // Paso 3: método de instancia que cambia el estado.
 // Paso 4: invariante (Atp nunca baja de 0) y validar ANTES de cambiar el estado.
 // Paso 5: propiedad calculada sobre estado que cambia.
+// Paso 6: sobrecarga de métodos.
 // ============================================================================
 
 // Fase 2 — Namespace file-scoped. Fase 3: la carpeta Organulos/ se refleja en el namespace.
@@ -49,6 +50,16 @@ public sealed class Mitocondria
     {
         Atp += glucosa.Moleculas * Fisiologia.AtpRespiracionAerobica;
     }
+
+    // Fase 4 · Paso 6 — SOBRECARGA: mismo nombre, distintos parámetros.
+    // El compilador elige la versión al COMPILAR mirando el tipo del argumento:
+    //   m.Respirar(new Glucosa(2)) → Respirar(Glucosa)
+    //   m.Respirar(2)              → Respirar(int)
+    // Solo cuentan los parámetros, NO el tipo de retorno:
+    //   public int Respirar(int otro) => 0;  → error CS0111 (ya existe un Respirar(int)).
+    // Delega en la otra versión en vez de copiar la fórmula: la lógica vive en un solo sitio,
+    // y la validación llega gratis: new Glucosa(-1) ya lanza (Fase 3).
+    public void Respirar(int moleculas) => Respirar(new Glucosa(moleculas));
 
     // Fase 4 · Paso 4 — Invariante: una regla que el objeto cumple SIEMPRE → Atp >= 0.
     // Orden obligatorio: 1) validar  2) cambiar el estado.
