@@ -161,4 +161,23 @@ public class MitocondriaPruebas
         Assert.Throws<ArgumentOutOfRangeException>(accion);
         Assert.Equal(30, mitocondria.Atp);
     }
+
+    // Fase 4 · Paso 5 — La misma propiedad calculada cambia de valor según el estado.
+    [Fact]
+    public void EstaAgotadaSigueAlAtp()
+    {
+        // Arrange
+        var mitocondria = new Mitocondria();
+
+        // Act + Assert: nueva → agotada
+        Assert.True(mitocondria.EstaAgotada);
+
+        // Act + Assert: respira → ya no está agotada
+        mitocondria.Respirar(new Glucosa(1));
+        Assert.False(mitocondria.EstaAgotada);
+
+        // Act + Assert: gasta todo → agotada otra vez
+        mitocondria.Gastar(mitocondria.Atp);
+        Assert.True(mitocondria.EstaAgotada);
+    }
 }
