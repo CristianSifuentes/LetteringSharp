@@ -4,6 +4,7 @@
 // Paso 2: propiedad { get; private set; }.
 // Paso 3: método de instancia que cambia el estado.
 // Paso 4: invariante (Atp nunca baja de 0) y validar ANTES de cambiar el estado.
+// Paso 5: propiedad calculada sobre estado que cambia.
 // ============================================================================
 
 // Fase 2 — Namespace file-scoped. Fase 3: la carpeta Organulos/ se refleja en el namespace.
@@ -28,6 +29,14 @@ public sealed class Mitocondria
     // Compáralo con Adn.Secuencia { get; } (Fase 3): ni siquiera desde dentro puede cambiar.
     // Sin inicializar, un int vale 0 (valor por defecto).
     public int Atp { get; private set; }
+
+    // Fase 4 · Paso 5 — Propiedad CALCULADA (expression-bodied, '=>'): no guarda nada,
+    // se evalúa cada vez que se lee, a partir de Atp.
+    // En la Fase 3, Adn.Longitud también era calculada, pero Secuencia nunca cambiaba:
+    // siempre daba lo mismo. Aquí Atp cambia, así que EstaAgotada puede dar true, luego false,
+    // luego true otra vez. No hace falta mantenerla "sincronizada": nunca se queda desfasada.
+    // No tiene 'set': no se puede asignar ni desde dentro (solo se cambia cambiando Atp).
+    public bool EstaAgotada => Atp == 0;
 
     // Fase 4 · Paso 3 — Método de INSTANCIA: se llama sobre un objeto (mitocondria.Respirar(g))
     // y cambia el estado de ESE objeto. Cada Mitocondria tiene su propio Atp.
