@@ -7,6 +7,7 @@
 // Paso 5: propiedad calculada sobre estado que cambia.
 // Paso 6: sobrecarga de métodos.
 // Paso 7: constructor normal y encadenar constructores con : this(...).
+// Paso 8: campo private readonly y la convención _nombre.
 // ============================================================================
 
 // Fase 2 — Namespace file-scoped. Fase 3: la carpeta Organulos/ se refleja en el namespace.
@@ -23,6 +24,21 @@ namespace Organismo.Biologia.Organulos;
 // sealed: igual que en los records de la Fase 3, nadie puede heredar de ella.
 public sealed class Mitocondria
 {
+    // Fase 4 · Paso 8 — const privada: valor por defecto, solo visible dentro de la clase.
+    private const int CapacidadPorDefecto = 1000;
+
+    // Fase 4 · Paso 8 — CAMPO 'private readonly':
+    //   campo     → una variable del objeto, sin get/set: guarda el dato "en crudo".
+    //   private   → nadie de fuera lo ve; se expone (si hace falta) con una propiedad.
+    //   readonly  → solo se asigna en su declaración o en un CONSTRUCTOR. Después, nunca más:
+    //               _capacidadMaxima = 5;  dentro de un método → error CS0191.
+    //   _nombre   → convención de .NET para campos privados: se distinguen a simple vista
+    //               de parámetros y variables locales (capacidadMaxima) y de propiedades (Atp).
+    // const frente a readonly:
+    //   const    → fijo al COMPILAR, igual para todos los objetos (Fase 2).
+    //   readonly → fijo al CONSTRUIR, cada objeto puede tener el suyo.
+    private readonly int _capacidadMaxima;
+
     // Fase 4 · Paso 2 — { get; private set; }: ventanilla de solo lectura.
     //   get         → público: cualquiera LEE  m.Atp
     //   private set → solo el código DENTRO de Mitocondria puede ESCRIBIR Atp.
@@ -40,16 +56,32 @@ public sealed class Mitocondria
     // No tiene 'set': no se puede asignar ni desde dentro (solo se cambia cambiando Atp).
     public bool EstaAgotada => Atp == 0;
 
+    // Fase 4 · Paso 8 — Propiedad que EXPONE el campo privado solo para leer.
+    // El campo guarda el dato; la propiedad es la ventanilla pública (sin set).
+    public int CapacidadMaxima => _capacidadMaxima;
+
     // Fase 4 · Paso 7 — Constructor NORMAL: se llama como la clase y no devuelve nada.
     // Se ejecuta una vez, al hacer new, y deja el objeto en un estado válido desde el principio.
     // Frente al constructor primario del record (Fase 3: Adn(string Secuencia)), este:
     //   - no genera propiedades: las asignamos nosotros (Atp = atpInicial);
     //   - puede tener cuerpo { } con la validación y la lógica que haga falta.
     // Aplica el invariante del Paso 4 también al NACER: no hay mitocondrias con ATP negativo.
-    public Mitocondria(int atpInicial)
+    // Fase 4 · Paso 8 — Este es ahora el constructor "principal": el único que asigna
+    // _capacidadMaxima (readonly: el constructor es el último sitio donde se puede).
+    public Mitocondria(int atpInicial, int capacidadMaxima)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacidadMaxima);
         ArgumentOutOfRangeException.ThrowIfNegative(atpInicial);
-        Atp = atpInicial;   // private set: desde dentro sí se puede escribir
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(atpInicial, capacidadMaxima);
+
+        _capacidadMaxima = capacidadMaxima;   // readonly: permitido aquí, en el constructor
+        Atp = atpInicial;                     // private set: desde dentro sí se puede escribir
+    }
+
+    // Fase 4 · Paso 8 — Encadena con la capacidad por defecto. Cadena completa:
+    //   Mitocondria() → this(0) → Mitocondria(int) → this(0, 1000) → Mitocondria(int, int)
+    public Mitocondria(int atpInicial) : this(atpInicial, CapacidadPorDefecto)
+    {
     }
 
     // Fase 4 · Paso 7 — Encadenar constructores con ': this(...)'.
@@ -68,9 +100,12 @@ public sealed class Mitocondria
     //   Fisiologia.AtpRespiracionAerobica → Fase 2 (const en static class)
     //   Glucosa                           → Fase 3 (record que ya validó Moleculas >= 0)
     //   Atp += ...                        → Fase 4 (private set usado desde DENTRO de la clase)
+    // Fase 4 · Paso 8 — La capacidad (readonly) limita lo que se acumula: el ATP que
+    // no cabe se pierde (en la célula real se disipa como calor).
     public void Respirar(Glucosa glucosa)
     {
-        Atp += glucosa.Moleculas * Fisiologia.AtpRespiracionAerobica;
+        var producido = glucosa.Moleculas * Fisiologia.AtpRespiracionAerobica;
+        Atp = Math.Min(Atp + producido, _capacidadMaxima);
     }
 
     // Fase 4 · Paso 6 — SOBRECARGA: mismo nombre, distintos parámetros.
