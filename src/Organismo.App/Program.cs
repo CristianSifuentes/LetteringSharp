@@ -3,7 +3,9 @@
 // El compilador genera ambos; el ejecutable se llama 'cuerpo' (ver .csproj).
 // ============================================================================
 using Organismo.Biologia;
+using Organismo.Biologia.Celulas;
 using Organismo.Biologia.Moleculas;
+using Organismo.Biologia.Organulos;
 
 // ----------------------------------------------------------------------------
 // Fase 2 — Fisiologia: constantes y estáticos «globales», sin crear objetos.
@@ -53,3 +55,41 @@ Console.WriteLine(new Hormona("Insulina", 12.5));
 // Fase 3 — Esto NO compila desde la App (descoméntalo para ver el error):
 // Ensamblado.ProporcionGc("ACGT");   // CS0122: 'Ensamblado' es inaccesible por su nivel de protección (internal)
 // Bases.Validar("ACGT");             // CS0103: 'Bases' no existe en este contexto (file)
+
+// ----------------------------------------------------------------------------
+// Fase 4 — Clases con estado: una Mitocondria produce ATP y una Neurona lo gasta.
+// ----------------------------------------------------------------------------
+Console.WriteLine();
+Console.WriteLine("== Fase 4: Clases con estado ==");
+
+// Fase 4 · Pasos 7-8 — Constructor con argumentos con nombre; capacidad readonly.
+var mitocondria = new Mitocondria(atpInicial: 0, capacidadMaxima: 100);
+Console.WriteLine($"Mitocondria nueva: {mitocondria.Atp} ATP (capacidad {mitocondria.CapacidadMaxima}), agotada: {mitocondria.EstaAgotada}");
+
+// Fase 4 · Pasos 3 y 6 — Método de instancia y su sobrecarga Respirar(int).
+mitocondria.Respirar(new Glucosa(1));
+mitocondria.Respirar(1);
+Console.WriteLine($"Tras respirar 2 glucosas: {mitocondria.Atp} ATP, agotada: {mitocondria.EstaAgotada}");
+
+// Fase 4 · Paso 9 — La Neurona recibe la MISMA mitocondria (referencia, Paso 1).
+var neurona = new Neurona(mitocondria);
+while (!mitocondria.EstaAgotada)
+{
+    neurona.Disparar();
+}
+Console.WriteLine($"La neurona disparó {neurona.Impulsos} impulsos hasta agotar la mitocondria ({mitocondria.Atp} ATP)");
+
+// Fase 4 · Paso 4 — Invariante: sin ATP, Disparar lanza y el estado queda intacto.
+try
+{
+    neurona.Disparar();
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine($"Rechazado: {ex.Message} Impulsos sigue en {neurona.Impulsos}.");
+}
+
+// Fase 4 — Esto NO compila (descoméntalo para ver el error):
+// mitocondria.Atp = 9999;          // CS0272: el set es privado (Paso 2)
+// _ = mitocondria with { };        // CS8858: 'with' solo existe en records (Paso 1)
+// _ = neurona.mitocondria;         // CS1061: el primary constructor de clase no genera propiedades (Paso 9)
